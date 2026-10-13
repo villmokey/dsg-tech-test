@@ -108,6 +108,9 @@ export const useCartStore = create<CartState>()(
     {
       name: "kodeva-cart",
       version: 1,
+      // Persist only the lines — transient UI state (lastError) must not
+      // resurrect on the next visit.
+      partialize: (state) => ({ lines: state.lines }),
     },
   ),
 );
