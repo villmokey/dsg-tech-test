@@ -35,3 +35,10 @@ export function formatPrice(amount: number): string {
 export function formatNumber(amount: number): string {
   return new Intl.NumberFormat(siteConfig.locale).format(amount);
 }
+
+export function formatDate(iso: string): string {
+  return new Intl.DateTimeFormat(siteConfig.locale, {
+    dateStyle: "long",
+    timeZone: "UTC",
+  }).format(new Date(iso));
+}

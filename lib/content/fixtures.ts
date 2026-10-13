@@ -18,13 +18,11 @@ import type {
 function block(
   style: string,
   text: string,
-  level?: number,
 ): PortableTextBlock {
   return {
     _type: "block",
     _key: crypto.randomUUID(),
     style,
-    ...(level ? { level } : {}),
     markDefs: [],
     children: [
       { _type: "span", _key: crypto.randomUUID(), text, marks: [] },
@@ -34,7 +32,6 @@ function block(
 
 const p = (text: string) => block("normal", text);
 const h2 = (text: string) => block("h2", text);
-const li = (text: string) => block("normal", text, 1);
 
 /* -------------------------------- products -------------------------------- */
 
