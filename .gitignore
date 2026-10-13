@@ -36,6 +36,12 @@ yarn-error.log*
 # vercel
 .vercel
 
+# local dev data (leads fallback store)
+/.data
+
+# command code
+/.commandcode
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
