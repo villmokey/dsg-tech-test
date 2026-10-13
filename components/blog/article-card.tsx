@@ -10,13 +10,22 @@ export function ArticleCard({ article }: { article: Article }) {
       className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-background transition-shadow hover:shadow-md"
     >
       <div className="relative aspect-[16/9] overflow-hidden bg-muted">
-        <Image
-          src={article.coverImage.url}
-          alt={article.coverImage.alt}
-          fill
-          sizes="(min-width: 768px) 50vw, 100vw"
-          className="object-cover transition-transform duration-300 group-hover:scale-[1.02]"
-        />
+        {article.coverImage?.url ? (
+          <Image
+            src={article.coverImage.url}
+            alt={article.coverImage.alt}
+            fill
+            sizes="(min-width: 768px) 50vw, 100vw"
+            className="object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+          />
+        ) : (
+          <div
+            aria-hidden="true"
+            className="flex h-full w-full items-center justify-center bg-brand-soft text-2xl font-bold text-brand"
+          >
+            K
+          </div>
+        )}
       </div>
       <div className="flex flex-1 flex-col gap-1.5 p-4">
         <p className="text-xs font-semibold text-brand">{article.category}</p>

@@ -35,13 +35,15 @@ export async function generateMetadata({
       description: article.excerpt,
       url: `/blog/${article.slug}`,
       publishedTime: article.publishedAt,
-      images: [{ url: article.coverImage.url, alt: article.coverImage.alt }],
+      images: article.coverImage?.url
+        ? [{ url: article.coverImage.url, alt: article.coverImage.alt }]
+        : undefined,
     },
     twitter: {
       card: "summary_large_image",
       title: article.title,
       description: article.excerpt,
-      images: [article.coverImage.url],
+      images: article.coverImage?.url ? [article.coverImage.url] : undefined,
     },
   };
 }
@@ -69,7 +71,7 @@ export default async function ArticlePage({
     "@type": "BlogPosting",
     headline: article.title,
     description: article.excerpt,
-    image: article.coverImage.url,
+    image: article.coverImage?.url || undefined,
     datePublished: article.publishedAt,
     author: {
       "@type": "Organization",
@@ -109,14 +111,16 @@ export default async function ArticlePage({
           </time>
         </header>
         <div className="relative mt-8 aspect-[16/9] overflow-hidden rounded-2xl border border-border bg-muted">
-          <Image
-            src={article.coverImage.url}
-            alt={article.coverImage.alt}
-            fill
-            priority
-            sizes="(min-width: 768px) 768px, 100vw"
-            className="object-cover"
-          />
+          {article.coverImage?.url ? (
+            <Image
+              src={article.coverImage.url}
+              alt={article.coverImage.alt}
+              fill
+              priority
+              sizes="(min-width: 768px) 768px, 100vw"
+              className="object-cover"
+            />
+          ) : null}
         </div>
         <div className="article-prose mt-8">
           <PortableText value={article.body} />

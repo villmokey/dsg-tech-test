@@ -90,37 +90,72 @@ export const publishedArticlesQuery = `*[_type == "article" && published == true
 export const articleBySlugQuery = `*[_type == "article" && published == true && slug.current == $slug][0] ${articleProjection}`;
 
 /* --------------------------------- mappers ---------------------------------- */
+/* Every mapper normalizes CMS data into render-safe shapes. Sanity's schema
+ * validation only runs in the Studio — API mutations and partial documents can
+ * contain anything, and a crashing render pins the stale page in the ISR
+ * cache. Missing optional fields degrade to empty render-safe values; only
+ * structurally unusable documents (no slug, no packages) are dropped. */
+
+function str(value: unknown, fallback = ""): string {
+  return typeof value === "string" ? value : fallback;
+}
 
 function toProduct(doc: Record<string, unknown>): Product {
+  const slug =
+    typeof (doc.slug as { current?: string } | undefined)?.current === "string"
+      ? (doc.slug as { current: string }).current
+      : "";
+  const images = ((doc.images as Product["images"]) ?? []).filter(
+    (image): image is Product["images"][number] => Boolean(image?.url),
+  );
+  const packages = ((doc.packages as Product["packages"]) ?? []).map((pkg) => ({
+    id: pkg.id,
+    name: str(pkg.name, pkg.id),
+    monthlyPrice: typeof pkg.monthlyPrice === "number" ? pkg.monthlyPrice : 0,
+    regularMonthlyPrice:
+      typeof pkg.regularMonthlyPrice === "number"
+        ? pkg.regularMonthlyPrice
+        : null,
+    highlights: (pkg.highlights as string[]) ?? [],
+  }));
   return {
-    id: doc.id as string,
-    slug: (doc.slug as { current: string }).current,
-    name: doc.name as string,
-    category: doc.category as ProductCategory,
-    tagline: doc.tagline as string,
-    description: doc.description as string,
+    id: str(doc.id),
+    slug,
+    name: str(doc.name),
+    category: (doc.category as ProductCategory) ?? "addons",
+    tagline: str(doc.tagline),
+    description: str(doc.description),
     features: (doc.features as string[]) ?? [],
-    images: (doc.images as Product["images"]) ?? [],
-    unit: doc.unit as Product["unit"],
-    promoQuotaRemaining: (doc.promoQuotaRemaining as number) ?? 0,
-    promoQuotaTotal: (doc.promoQuotaTotal as number) ?? 0,
+    images,
+    unit: doc.unit === "user" ? "user" : "outlet",
+    promoQuotaRemaining:
+      typeof doc.promoQuotaRemaining === "number" ? doc.promoQuotaRemaining : 0,
+    promoQuotaTotal:
+      typeof doc.promoQuotaTotal === "number" ? doc.promoQuotaTotal : 0,
     badge: (doc.badge as string | undefined) ?? undefined,
-    packages: ((doc.packages as Product["packages"]) ?? []).map((pkg) => ({
-      ...pkg,
-      regularMonthlyPrice: pkg.regularMonthlyPrice ?? null,
-    })),
+    packages,
   };
 }
 
 function toArticle(doc: Record<string, unknown>): Article {
+  const slug =
+    typeof (doc.slug as { current?: string } | undefined)?.current === "string"
+      ? (doc.slug as { current: string }).current
+      : "";
+  const coverImage = doc.coverImage as Article["coverImage"] | null;
   return {
-    title: doc.title as string,
-    slug: (doc.slug as { current: string }).current,
-    category: doc.category as string,
-    excerpt: doc.excerpt as string,
-    coverImage: doc.coverImage as Article["coverImage"],
+    title: typeof doc.title === "string" ? doc.title : "",
+    slug,
+    category: typeof doc.category === "string" ? doc.category : "",
+    excerpt: typeof doc.excerpt === "string" ? doc.excerpt : "",
+    // Missing covers degrade to "card without an image" downstream; they
+    // must never crash a render or the ISR cache pins a stale page.
+    coverImage: coverImage ?? { url: "", alt: "" },
     body: (doc.body as Article["body"]) ?? [],
-    publishedAt: doc.publishedAt as string,
+    publishedAt:
+      typeof doc.publishedAt === "string"
+        ? doc.publishedAt
+        : "1970-01-01T00:00:00.000Z",
     published: doc.published === true,
     relatedProductIds: (doc.relatedProductIds as string[]) ?? [],
   };
@@ -129,8 +164,20 @@ function toArticle(doc: Record<string, unknown>): Article {
 export function mapLanding(doc: Record<string, unknown> | null): LandingContent | null {
   if (!doc) return null;
   const hero = (doc.hero ?? {}) as Record<string, unknown>;
-  const str = (value: unknown, fallback = ""): string =>
-    typeof value === "string" ? value : fallback;
+  const testimonials = ((doc.testimonials as LandingContent["testimonials"]) ?? [])
+    .map((item) => ({
+      quote: str(item.quote),
+      author: str(item.author),
+      role: str(item.role),
+      company: str(item.company),
+    }))
+    .filter((item) => item.quote && item.author);
+  const faq = ((doc.faq as LandingContent["faq"]) ?? [])
+    .map((item) => ({
+      question: str(item.question),
+      answer: str(item.answer),
+    }))
+    .filter((item) => item.question && item.answer);
   return {
     hero: {
       eyebrow: str(hero.eyebrow),
@@ -144,15 +191,28 @@ export function mapLanding(doc: Record<string, unknown> | null): LandingContent 
       ctaHref: str(hero.ctaHref, "/products"),
     },
     featuredProductIds: (doc.featuredProductIds as string[]) ?? [],
-    testimonials: (doc.testimonials as LandingContent["testimonials"]) ?? [],
-    faq: (doc.faq as LandingContent["faq"]) ?? [],
+    testimonials,
+    faq,
   };
 }
 
 export function mapProducts(docs: Record<string, unknown>[]): Product[] {
-  return docs.map(toProduct);
+  // A product without a slug has no detail URL; without packages it has
+  // nothing to sell — either would crash cards, selectors, or the pricing
+  // engine downstream.
+  return docs
+    .map(toProduct)
+    .filter((product) => Boolean(product.slug) && product.packages.length > 0);
 }
 
+/**
+ * Only drops articles that are unusable (no slug → no URL). Articles missing
+ * optional fields (cover, excerpt, …) are kept and rendered gracefully — one
+ * incomplete CMS document must never crash a render, because a crashing
+ * regeneration pins the stale page in the ISR cache indefinitely.
+ */
 export function mapArticles(docs: Record<string, unknown>[]): Article[] {
-  return docs.map(toArticle);
+  return docs
+    .map(toArticle)
+    .filter((article) => Boolean(article.slug));
 }
