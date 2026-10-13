@@ -164,6 +164,7 @@ function toArticle(doc: Record<string, unknown>): Article {
 export function mapLanding(doc: Record<string, unknown> | null): LandingContent | null {
   if (!doc) return null;
   const hero = (doc.hero ?? {}) as Record<string, unknown>;
+  const heroImage = hero.image as LandingContent["hero"]["image"] | null;
   const testimonials = ((doc.testimonials as LandingContent["testimonials"]) ?? [])
     .map((item) => ({
       quote: str(item.quote),
@@ -183,10 +184,11 @@ export function mapLanding(doc: Record<string, unknown> | null): LandingContent 
       eyebrow: str(hero.eyebrow),
       title: str(hero.title),
       subtitle: str(hero.subtitle),
-      image: (hero.image as LandingContent["hero"]["image"]) ?? {
-        url: "/images/hero.svg",
-        alt: "Kodeva",
-      },
+      // A missing/assetless hero image falls back to the bundled placeholder.
+      image:
+        heroImage && typeof heroImage.url === "string" && heroImage.url
+          ? heroImage
+          : { url: "/images/hero.svg", alt: "Kodeva" },
       ctaLabel: str(hero.ctaLabel),
       ctaHref: str(hero.ctaHref, "/products"),
     },

@@ -12,16 +12,19 @@ Approximately **2 hours wall-clock** (single working session, 2026-10-13, ~18:30
 
 ## Live deployment
 
-> **Not yet deployed at the time of writing** — deployment requires an account the author must create. The app is a single Next.js application and deploys to Vercel's free tier with zero code changes:
->
-> 1. Push this repository to GitHub.
-> 2. Import it on [vercel.com/new](https://vercel.com/new) (free "Hobby" tier).
-> 3. Set the environment variables from `.env.example` (see CMS setup below — Sanity cloud is free).
-> 4. Set `NEXT_PUBLIC_SITE_URL` to the deployment URL so canonical/OG/sitemap URLs are correct.
->
-> **Production URL:** _fill in after deploying_ — `https://…`
-> **CMS/admin URL:** `https://…/studio` (embedded in the same deployment)
-> **Demo credentials:** the Sanity Studio at `/studio` is gated by Sanity accounts. Invite the reviewer's email (free) via *sanity.io/manage → Members*, or share the demo account credentials privately in the submission email.
+Deployed on **Vercel (free Hobby tier)** with Sanity's free tier as the CMS:
+
+- **Website:** https://dsg-tech-test.vercel.app
+- **CMS/admin (Studio):** https://dsg-tech-test.vercel.app/studio
+- **Demo credentials:** the Studio is gated by Sanity accounts — the reviewer's email is invited via *sanity.io/manage → Members* (free), or demo credentials are shared privately in the submission email.
+- **Content revalidation:** publishing in the Studio fires a Sanity webhook → `/api/revalidate` → `revalidateTag("content")`; published changes appear on the site within seconds, no redeploy.
+
+How it was deployed (for reproducibility):
+
+1. Repository pushed to GitHub, imported on [vercel.com/new](https://vercel.com/new).
+2. Environment variables from `.env.example` set in Vercel → Settings → Environment Variables (`NEXT_PUBLIC_*` are build-time — a redeploy is needed when they change).
+3. `NEXT_PUBLIC_SITE_URL` set to the production URL for canonical/OG/sitemap URLs.
+4. Sanity webhook configured to POST to `https://dsg-tech-test.vercel.app/api/revalidate?secret=<SANITY_REVALIDATE_SECRET>` (Vercel Deployment Protection must not cover the production alias, or webhook calls get a 401 from the SSO wall).
 
 ## Local setup
 
@@ -163,14 +166,14 @@ All events go to `window.dataLayer` with GA4-style names and ecommerce payloads 
 - SEO: per-page titles/descriptions, canonicals, Open Graph/Twitter cards (WhatsApp preview), generated OG image, JSON-LD (Organization, FAQPage, Product with offers, BlogPosting), sitemap, robots
 - Mobile-first responsive design; Lighthouse mobile **Performance 96** (target ≥ 80) — see `docs/lighthouse/lighthouse-mobile-screenshot.png`
 - 30 unit tests covering pricing, cross-variant quota, checkout validation, payment simulation; typecheck + lint + build clean
+- Deployed and live on Vercel free tier with webhook-driven content revalidation (URLs above)
 - `AI_LOG.md`, seed data, `.env.example`, un-squashed commit history
 
 **Incomplete / deferred (intentionally, per the "reliable core over extras" rule):**
-- Actual deployment (requires account creation; steps documented above)
 - CMS draft preview, scheduled publishing, vouchers, catalog search/sort in shareable URLs (bonus items)
 - Full i18n (locale/currency are config-ready; translations not required by the brief)
 
-**With one more week:** deployment + reviewer walkthrough video; CMS section-order/visibility controls; Playwright end-to-end tests over the checkout flow; draft preview via Sanity presentation tool; voucher module on top of the pricing engine; i18n routing (id-ID / ms-MY / en-SG) with localized CMS field variants.
+**With one more week:** reviewer walkthrough video; CMS section-order/visibility controls; Playwright end-to-end tests over the checkout flow; draft preview via Sanity presentation tool; voucher module on top of the pricing engine; i18n routing (id-ID / ms-MY / en-SG) with localized CMS field variants.
 
 ## Marketplace future-backend integration plan
 
