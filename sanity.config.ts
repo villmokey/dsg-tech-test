@@ -14,15 +14,19 @@ export default defineConfig({
   dataset: process.env.NEXT_PUBLIC_SANITY_DATASET ?? "production",
   basePath: "/studio",
   schema: { types: schemaTypes },
-  structure: (structure: StructureBuilder) => {
-    // Landing page is a singleton; leads are read-only records.
-    return structure.list().items([
-      structure.documentTypeListItem("landingPage").title("Landing Page"),
-      structure.divider(),
-      structure.documentTypeListItem("product").title("Products"),
-      structure.documentTypeListItem("article").title("Articles"),
-      structure.divider(),
-      structure.documentTypeListItem("lead").title("Leads"),
-    ]);
-  },
+  plugins: [
+    structureTool({
+      structure: (structure: StructureBuilder) => {
+        // Landing page is a singleton; leads are read-only records.
+        return structure.list().items([
+          structure.documentTypeListItem("landingPage").title("Landing Page"),
+          structure.divider(),
+          structure.documentTypeListItem("product").title("Products"),
+          structure.documentTypeListItem("article").title("Articles"),
+          structure.divider(),
+          structure.documentTypeListItem("lead").title("Leads"),
+        ]);
+      },
+    }),
+  ],
 });

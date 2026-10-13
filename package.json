@@ -6,7 +6,12 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "generate:images": "node scripts/generate-images.mjs",
+    "generate:seed": "node scripts/generate-seed.mjs"
   },
   "dependencies": {
     "@portabletext/react": "^8.0.1",

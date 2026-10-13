@@ -5,7 +5,6 @@ import type {
   LandingContent,
   Product,
   ProductCategory,
-  PackageId,
 } from "@/lib/types";
 
 /**

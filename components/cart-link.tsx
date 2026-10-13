@@ -1,8 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 import { selectCartCount, useCartStore } from "@/lib/marketplace/cart-store";
+
+const noopSubscribe = () => () => {};
+const getMounted = () => true;
+const getServerSnapshot = () => false;
 
 /**
  * Cart access from every page. The badge intentionally renders 0 on the
@@ -11,8 +15,11 @@ import { selectCartCount, useCartStore } from "@/lib/marketplace/cart-store";
  */
 export function CartLink() {
   const count = useCartStore(selectCartCount);
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
+  const mounted = useSyncExternalStore(
+    noopSubscribe,
+    getMounted,
+    getServerSnapshot,
+  );
 
   return (
     <Link

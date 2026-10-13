@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { formatPrice, formatNumber } from "@/lib/site-config";
 import { toEcommerceItem, trackAddToCart } from "@/lib/analytics/data-layer";
 import { useViewItem } from "@/lib/analytics/use-view-item";
@@ -56,11 +56,6 @@ export function PackageSelector({ product }: { product: Product }) {
 
   // Fire view_item once per product/package combination (guard inside hook).
   useViewItem(product, selected.id);
-
-  useEffect(() => {
-    // Keep the quantity within the live quota as the cart changes.
-    setQuantity((current) => Math.min(current, Math.max(1, maxForLine)));
-  }, [maxForLine]);
 
   function handlePackageChange(packageId: PackageId) {
     setSelectedId(packageId);
