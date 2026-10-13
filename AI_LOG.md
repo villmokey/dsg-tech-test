@@ -67,6 +67,13 @@ The author directed the work, reviewed outputs, and set repo conventions (e.g. c
 - **Fix:** the root list now passes the options object with an explicit `id: "root"` and `title`, verified against the `StructureBuilder` type definitions shipped in `node_modules/sanity/lib`.
 - **Verification:** `tsc` against the typed `ListInput` (which requires `id`), clean build, and author confirmation that the desk renders.
 
+### 8. Vercel deploy failed prerendering `/_not-found` (`Invalid URL`)
+
+- **What happened:** the first Vercel deployment failed with `Error occurred prerendering page "/_not-found"`. Root cause: the root layout evaluates `metadataBase: new URL(siteConfig.url)`, and the author's `NEXT_PUBLIC_SITE_URL` on Vercel was set **without a protocol** (`kodeva.vercel.app`), so `new URL()` threw at module evaluation during prerender. Locally the variable is unset (localhost default), which is why the build never failed before deploying.
+- **How it was found:** reproduced locally by running `NEXT_PUBLIC_SITE_URL=kodeva.vercel.app pnpm build` — identical stack trace to the Vercel log, confirming the diagnosis before patching.
+- **Fix:** `siteConfig.url` now runs through a `normalizeSiteUrl` helper that prepends `https://` when the protocol is missing and strips trailing slashes.
+- **Verification:** clean builds with a protocol-less URL, a full URL, and no env var at all.
+
 ## AI-assisted implementation and edge cases tested
 
 The **cross-variant promo-quota engine** (`lib/marketplace/pricing.ts`) was implemented AI-assisted and validated on three levels:

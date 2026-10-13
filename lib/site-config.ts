@@ -1,9 +1,27 @@
+/**
+ * Normalizes NEXT_PUBLIC_SITE_URL so a value without a protocol (e.g.
+ * "kodeva.vercel.app" pasted from the Vercel dashboard) cannot crash
+ * `new URL()` in metadata. Adds https:// when missing and strips trailing
+ * slashes.
+ */
+function normalizeSiteUrl(value: string | undefined, fallback: string): string {
+  const raw = value?.trim();
+  if (!raw) return fallback;
+  const withoutTrailingSlashes = raw.replace(/\/+$/, "");
+  return /^https?:\/\//i.test(withoutTrailingSlashes)
+    ? withoutTrailingSlashes
+    : `https://${withoutTrailingSlashes}`;
+}
+
 export const siteConfig = {
   name: "Kodeva",
   tagline: "Software bisnis untuk UMKM yang mau naik kelas",
   description:
     "Kodeva membantu bisnis kecil dan menengah dengan software POS, HR, dan payroll berbasis langganan. Promo Akhir Tahun: kuota lisensi terbatas.",
-  url: process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
+  url: normalizeSiteUrl(
+    process.env.NEXT_PUBLIC_SITE_URL,
+    "http://localhost:3000",
+  ),
   locale: "id-ID",
   currency: "IDR",
   timezone: "Asia/Jakarta",
