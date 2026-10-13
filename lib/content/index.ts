@@ -1,7 +1,7 @@
 import { cacheLife, cacheTag } from "next/cache";
 import {
   isSanityConfigured,
-  sanityReadClient,
+  getReadClient,
 } from "@/lib/content/sanity-client";
 import {
   articleBySlugQuery,
@@ -37,7 +37,7 @@ async function fetchLanding(): Promise<LandingContent> {
   cacheLife("max");
   if (isSanityConfigured) {
     try {
-      const doc = await sanityReadClient.fetch(landingQuery);
+      const doc = await getReadClient().fetch(landingQuery);
       const mapped = mapLanding(doc);
       if (mapped) return mapped;
     } catch {
@@ -53,7 +53,7 @@ async function fetchProducts(): Promise<Product[]> {
   cacheLife("max");
   if (isSanityConfigured) {
     try {
-      const docs = await sanityReadClient.fetch(productsQuery);
+      const docs = await getReadClient().fetch(productsQuery);
       const mapped = mapProducts(docs);
       if (mapped.length > 0) return mapped;
     } catch {
@@ -69,7 +69,7 @@ async function fetchPublishedArticles(): Promise<Article[]> {
   cacheLife("max");
   if (isSanityConfigured) {
     try {
-      const docs = await sanityReadClient.fetch(publishedArticlesQuery);
+      const docs = await getReadClient().fetch(publishedArticlesQuery);
       const mapped = mapArticles(docs);
       if (mapped.length > 0) return mapped;
     } catch {
@@ -85,7 +85,7 @@ async function fetchArticleBySlug(slug: string): Promise<Article | null> {
   cacheLife("max");
   if (isSanityConfigured) {
     try {
-      const doc = await sanityReadClient.fetch(articleBySlugQuery, { slug });
+      const doc = await getReadClient().fetch(articleBySlugQuery, { slug });
       if (doc) return mapArticles([doc])[0];
     } catch {
       // fall through to fixtures on CMS outage

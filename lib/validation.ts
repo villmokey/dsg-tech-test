@@ -28,6 +28,18 @@ export const whatsappSchema = z
     message: "Nomor WhatsApp minimal 8 digit",
   });
 
+export const utmSchema = z
+  .object({
+    utm_source: z.string().max(120).optional(),
+    utm_medium: z.string().max(120).optional(),
+    utm_campaign: z.string().max(120).optional(),
+    utm_term: z.string().max(120).optional(),
+    utm_content: z.string().max(120).optional(),
+    capturedAt: z.string().max(40).optional(),
+  })
+  .nullable()
+  .optional();
+
 export const leadSchema = z
   .object({
     name: nameSchema,
@@ -35,8 +47,11 @@ export const leadSchema = z
     whatsapp: z.union([whatsappSchema, z.literal("")]).optional(),
     // Spam protection: a hidden field real users never fill, and the epoch ms
     // timestamp rendered into the form so the server can reject instant bots.
-    companyWebsite: z.literal("").optional(),
+    companyWebsite: z.string().max(200).optional(),
     formStartedAt: z.number().int().positive(),
+    // Attribution captured client-side from first-party storage.
+    utm: utmSchema,
+    landingPage: z.string().max(200).optional(),
   })
   .refine(
     (data) =>
@@ -66,17 +81,7 @@ export const orderSchema = z.object({
     )
     .min(1, "Keranjang kosong"),
   // Marketing attribution, captured client-side from first-party storage.
-  utm: z
-    .object({
-      utm_source: z.string().max(120).optional(),
-      utm_medium: z.string().max(120).optional(),
-      utm_campaign: z.string().max(120).optional(),
-      utm_term: z.string().max(120).optional(),
-      utm_content: z.string().max(120).optional(),
-      capturedAt: z.string().max(40).optional(),
-    })
-    .nullable()
-    .optional(),
+  utm: utmSchema,
 });
 
 export type OrderInput = z.infer<typeof orderSchema>;

@@ -1,5 +1,5 @@
 import imageUrlBuilder from "@sanity/image-url";
-import { sanityReadClient } from "@/lib/content/sanity-client";
+import { getReadClient } from "@/lib/content/sanity-client";
 import type {
   Article,
   LandingContent,
@@ -13,7 +13,14 @@ import type {
  * Keeping this in one place means the site never depends on raw CMS shapes.
  */
 
-const builder = imageUrlBuilder(sanityReadClient);
+let builder: ReturnType<typeof imageUrlBuilder> | null = null;
+
+function getBuilder() {
+  if (!builder) {
+    builder = imageUrlBuilder(getReadClient());
+  }
+  return builder;
+}
 
 export function sanityImage(
   image: SanityImageRef | undefined,
@@ -21,7 +28,7 @@ export function sanityImage(
 ) {
   if (!image) return undefined;
   return {
-    url: builder.image(image).auto("format").width(1200).url(),
+    url: getBuilder().image(image).auto("format").width(1200).url(),
     alt: image.alt ?? fallbackAlt,
   };
 }

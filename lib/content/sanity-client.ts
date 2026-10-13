@@ -1,4 +1,5 @@
 import { createClient } from "next-sanity";
+import type { SanityClient } from "next-sanity";
 
 export const sanityConfig = {
   projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID ?? "",
@@ -9,16 +10,26 @@ export const sanityConfig = {
 /** True when CMS env vars are present; otherwise the content layer falls back to fixtures. */
 export const isSanityConfigured = Boolean(sanityConfig.projectId);
 
-/** Public read client (dataset must be public-read; no token is ever shipped to the browser). */
-export const sanityReadClient = createClient({
-  projectId: sanityConfig.projectId,
-  dataset: sanityConfig.dataset,
-  apiVersion: sanityConfig.apiVersion,
-  useCdn: true,
-});
+/**
+ * Clients are created lazily: createClient throws when projectId is empty, so
+ * fixture-mode (no env vars) must never construct one at module scope.
+ */
+let readClient: SanityClient | null = null;
+
+export function getReadClient(): SanityClient {
+  if (!readClient) {
+    readClient = createClient({
+      projectId: sanityConfig.projectId,
+      dataset: sanityConfig.dataset,
+      apiVersion: sanityConfig.apiVersion,
+      useCdn: true,
+    });
+  }
+  return readClient;
+}
 
 /** Server-only write client for lead submissions. Never import from client components. */
-export function sanityWriteClient() {
+export function getWriteClient(): SanityClient {
   const token = process.env.SANITY_API_WRITE_TOKEN;
   if (!token) {
     throw new Error(
