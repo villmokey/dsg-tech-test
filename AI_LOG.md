@@ -60,6 +60,13 @@ The author directed the work, reviewed outputs, and set repo conventions (e.g. c
 - **Fix:** `partialize` the persistence to `{ lines }` only.
 - **Verification:** replayed the exact scenario headlessly — toast no longer resurrects; cart lines still survive reload.
 
+### 7. Sanity Desk structure crashed at runtime ("`id` is required for lists")
+
+- **What happened:** the custom Studio sidebar was written as `structure.list().items([...])` — the zero-argument `list()` pattern from older Sanity versions. In the installed Sanity v6, `ListInput.id` is **required**, so the desk threw "`id` is required for lists" as soon as a reviewer opened `/studio` with the CMS configured. Static checks (typecheck, lint, build) all passed because the zero-arg overload still exists in the types.
+- **How it was found:** manually, by the author, opening `/studio` — not by any automated check.
+- **Fix:** the root list now passes the options object with an explicit `id: "root"` and `title`, verified against the `StructureBuilder` type definitions shipped in `node_modules/sanity/lib`.
+- **Verification:** `tsc` against the typed `ListInput` (which requires `id`), clean build, and author confirmation that the desk renders.
+
 ## AI-assisted implementation and edge cases tested
 
 The **cross-variant promo-quota engine** (`lib/marketplace/pricing.ts`) was implemented AI-assisted and validated on three levels:

@@ -18,14 +18,19 @@ export default defineConfig({
     structureTool({
       structure: (structure: StructureBuilder) => {
         // Landing page is a singleton; leads are read-only records.
-        return structure.list().items([
-          structure.documentTypeListItem("landingPage").title("Landing Page"),
-          structure.divider(),
-          structure.documentTypeListItem("product").title("Products"),
-          structure.documentTypeListItem("article").title("Articles"),
-          structure.divider(),
-          structure.documentTypeListItem("lead").title("Leads"),
-        ]);
+        // `id` is required on the root list (Sanity v6 ListInput).
+        return structure.list({
+          id: "root",
+          title: "Kodeva CMS",
+          items: [
+            structure.documentTypeListItem("landingPage").title("Landing Page"),
+            structure.divider(),
+            structure.documentTypeListItem("product").title("Products"),
+            structure.documentTypeListItem("article").title("Articles"),
+            structure.divider(),
+            structure.documentTypeListItem("lead").title("Leads"),
+          ],
+        });
       },
     }),
   ],
