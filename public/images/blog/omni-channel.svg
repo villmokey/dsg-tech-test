@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#042f2e"/>
+      <stop offset="1" stop-color="#0f766e"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <circle cx="983.9999999999999" cy="126" r="176.4" fill="#2dd4bf" opacity="0.16"/>
+  <circle cx="180" cy="535.5" r="138.6" fill="#2dd4bf" opacity="0.12"/>
+  <rect x="96" y="88.2" width="312" height="56.699999999999996" rx="28.349999999999998" fill="#2dd4bf" opacity="0.9"/>
+  <text x="120" y="132.29999999999998" font-family="Arial, Helvetica, sans-serif" font-weight="700" font-size="28.349999999999998" fill="#042f2e">KODEVA</text>
+  <text x="96" y="327.6" font-family="Arial, Helvetica, sans-serif" font-weight="700" font-size="53.550000000000004" fill="#ffffff">Kanal Jualan Banyak</text>
+  <text x="96" y="390.6" font-family="Arial, Helvetica, sans-serif" font-size="26.46" fill="#2dd4bf">Studi kasus</text>
+  <g opacity="0.85">
+    <rect x="96" y="453.59999999999997" width="432" height="22.05" rx="11.025" fill="#ffffff" opacity="0.25"/>
+    <rect x="96" y="497.70000000000005" width="288" height="22.05" rx="11.025" fill="#ffffff" opacity="0.18"/>
+    <rect x="96" y="541.8" width="360" height="22.05" rx="11.025" fill="#ffffff" opacity="0.12"/>
+  </g>
+</svg>
